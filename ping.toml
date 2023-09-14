@@ -1,0 +1,116 @@
+#
+# This file is part of the IC2E '23 Celestial demo
+# (https://github.com/OpenFogStack/celestial-ic2e-demo).
+# Copyright (c) 2023 Tobias Pfandzelter, The OpenFogStack Team.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+# the satellite orbital model to use
+# options are "SGP4" and "Kepler"
+# SGP4 is more accurate, but complex to understand
+# Kepler uses circular orbits and is less accurate
+model = "SGP4"
+
+# the bounding box of our simulation
+# only satellites within that bounding box are emulated
+# use a tool such as bboxfinder.com to find the coordinates
+# format is [minlat, minlong, maxlat, maxlong]
+bbox = [-90, -180, 90, 180]
+# how often to update the simulation
+interval = 1
+# whether to show an animation
+animation = true
+# host IP addresses
+# put your own IP address here!!
+hosts = ["34.118.139.241:1969"]
+peeringhosts = ["192.168.10.3:1970"]
+# whether to use a database
+database = false
+
+# params to pass to SGP4
+[sgp4params]
+# in this case we need a start date
+# normally you can also just use 0 for Keplerian orbits
+starttime = 2023-09-01T12:00:00+00:00
+
+# network parameters
+[networkparams]
+# the speed of light in m/s
+islpropagation = 3.336e-6
+# the bandwidth of the ISLs in bits/s
+bandwidth = 10_000
+# how low a laser ISL can go over the ground
+mincommsaltitude = 80_000
+# minimum elevation of a satellite over the horizon
+minelevation = 10
+# speed of light in m/s
+gstpropagation = 3.336e-6
+# how a ground station connects to satellites
+groundstationconnectiontype = "all"
+
+# default compute parameters for the satellite servers
+# this can be overridden on a per-shell basis
+[computeparams]
+# we want to emulate a single core
+vcpu_count = 1
+# 512 MiB of RAM
+mem_size_mib = 512
+# 10 MiB of disk space
+disk_size_mib = 10
+# do not use hyperthreading
+ht_enabled = false
+# boot parameters to pass to the kernel
+# this is used to enable the random number generator of the host
+# that speeds up microVM boot time
+bootparams = "random.trust_cpu=on"
+# the kernel to use
+# note that in our example, this kernel already exists on the host
+# compiling your own kernel is really easy, though!
+kernel = "vmlinux.bin"
+# the root filesystem to use
+rootfs = "server.img"
+
+# these are our constellation shells
+# there can be multiple of them
+[[shell]]
+# number of orbital planes
+planes = 6
+# number of satellites per plane
+sats = 11
+# altitude of the satellites in km
+altitude = 781
+# inclination of the satellites in degrees
+inclination = 86.4
+# right ascension of ascending node in degrees
+# this is 360 degrees for walker delta constellations (Starlink)
+# and 180 degrees for walker star constellations (Iridium)
+arcofascendingnodes = 180.0
+# eccentricity of the orbit
+# 0.0 is a circular orbit
+# 0.0 < e < 1.0 is an elliptical orbit
+# e = 1.0 is a parabolic orbit
+eccentricity = 0.0
+
+# a ground station to add
+[[groundstation]]
+name = "boston"
+lat = 42.350183
+long = -71.097765
+
+# override some parameters for this ground station
+[groundstation.computeparams]
+vcpu_count = 4
+mem_size_mib = 4096
+disk_size_mib = 100
+rootfs = "ping.img"
